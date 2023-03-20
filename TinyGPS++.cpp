@@ -21,14 +21,14 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include "home/buggsaff/NavIC/TinyGPSPlus/src/TinyGPS++.cpp"
+#include "TinyGPS++.cpp"
 
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
 
-#define _GPRMCterm "GPRMC"
-#define _GPGGAterm "GPGGA"
+// #define _GPRMCterm "GPRMC"
+// #define _GPGGAterm "GPGGA"
 #define _GNRMCterm "GNRMC"
 #define _GNGGAterm "GNGGA"
 
@@ -200,10 +200,10 @@ bool TinyGPSPlus::endOfTermHandler()
   // the first term determines the sentence type
   if (curTermNumber == 0)
   {
-    if (!strcmp(term, _GPRMCterm) || !strcmp(term, _GNRMCterm))
-      curSentenceType = GPS_SENTENCE_GPRMC;
-    else if (!strcmp(term, _GPGGAterm) || !strcmp(term, _GNGGAterm))
-      curSentenceType = GPS_SENTENCE_GPGGA;
+    if (!strcmp(term, _GNRMCterm))            //$n if (!strcmp(term, _GPRMCterm) || !strcmp(term, _GNRMCterm))
+      curSentenceType = NavIC_SENTENCE_GNRMC; //$n curSentenceType = GPS_SENTENCE_GPRMC;
+    else if (!strcmp(term, _GNGGAterm))       //$n else if (!strcmp(term, _GPGGAterm) || !strcmp(term, _GNGGAterm))
+      curSentenceType = NavIC_SENTENCE_GNGGA; //$n curSentenceType = GPS_SENTENCE_GPGGA;
     else
       curSentenceType = GPS_SENTENCE_OTHER;
 
