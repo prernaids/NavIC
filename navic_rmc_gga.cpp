@@ -1,5 +1,5 @@
 /*
-TinyGPS++ - a small GPS library for Arduino providing universal NMEA parsing
+navic_rmc_gga++ - a small GPS library for Arduino providing universal NMEA parsing
 Based on work by and "distanceBetween" and "courseTo" courtesy of Maarten Lamers.
 Suggestion to add satellites, courseTo(), and cardinal() by Matt Monson.
 Location precision improvements suggested by Wayne Holder.
@@ -21,7 +21,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include "TinyGPS++.cpp"
+#include "navic_rmc_gga++.cpp"
 
 #include <string.h>
 #include <ctype.h>
@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define _GNRMCterm "GNRMC"
 #define _GNGGAterm "GNGGA"
 
-TinyGPSPlus::TinyGPSPlus()
+navic_rmc_ggaPlus::navic_rmc_ggaPlus()
     : parity(0), isChecksumTerm(false), curSentenceType(GPS_SENTENCE_OTHER), curTermNumber(0), curTermOffset(0), sentenceHasFix(false), customElts(0), customCandidates(0), encodedCharCount(0), sentencesWithFixCount(0), failedChecksumCount(0), passedChecksumCount(0)
 {
   term[0] = '\0';
@@ -42,7 +42,7 @@ TinyGPSPlus::TinyGPSPlus()
 // public methods
 //
 
-bool TinyGPSPlus::encode(char c)
+bool navic_rmc_ggaPlus::encode(char c)
 {
   ++encodedCharCount;
 
@@ -89,7 +89,7 @@ bool TinyGPSPlus::encode(char c)
 //
 // internal utilities
 //
-int TinyGPSPlus::fromHex(char a)
+int navic_rmc_ggaPlus::fromHex(char a)
 {
   if (a >= 'A' && a <= 'F')
     return a - 'A' + 10;
@@ -101,7 +101,7 @@ int TinyGPSPlus::fromHex(char a)
 
 // static
 // Parse a (potentially negative) number with up to 2 decimal digits -xxxx.yy
-int32_t TinyGPSPlus::parseDecimal(const char *term)
+int32_t navic_rmc_ggaPlus::parseDecimal(const char *term)
 {
   bool negative = *term == '-';
   if (negative)
@@ -120,7 +120,7 @@ int32_t TinyGPSPlus::parseDecimal(const char *term)
 
 // static
 // Parse degrees in that funny NMEA format DDMM.MMMM
-void TinyGPSPlus::parseDegrees(const char *term, RawDegrees &deg)
+void navic_rmc_ggaPlus::parseDegrees(const char *term, RawDegrees &deg)
 {
   uint32_t leftOfDecimal = (uint32_t)atol(term);
   uint16_t minutes = (uint16_t)(leftOfDecimal % 100);
@@ -147,7 +147,7 @@ void TinyGPSPlus::parseDegrees(const char *term, RawDegrees &deg)
 
 // Processes a just-completed term
 // Returns true if new sentence has just passed checksum test and is validated
-bool TinyGPSPlus::endOfTermHandler()
+bool navic_rmc_ggaPlus::endOfTermHandler()
 {
   // If it's the checksum term, and the checksum checks out, commit
   if (isChecksumTerm)
@@ -184,7 +184,9 @@ bool TinyGPSPlus::endOfTermHandler()
       }
 
       // Commit all custom listeners of this sentence type
-      for (TinyGPSCustom *p = customCandidates; p != NULL && strcmp(p->sentenceName, customCandidates->sentenceName) == 0; p = p->next)
+      for (navic_rmc_gga
+               Custom *p = customCandidates;
+           p != NULL && strcmp(p->sentenceName, customCandidates->sentenceName) == 0; p = p->next)
         p->commit();
       return true;
     }
@@ -200,10 +202,10 @@ bool TinyGPSPlus::endOfTermHandler()
   // the first term determines the sentence type
   if (curTermNumber == 0)
   {
-    if (!strcmp(term, _GNRMCterm))            //$n if (!strcmp(term, _GPRMCterm) || !strcmp(term, _GNRMCterm))
-      curSentenceType = NavIC_SENTENCE_GNRMC; //$n curSentenceType = GPS_SENTENCE_GPRMC;
-    else if (!strcmp(term, _GNGGAterm))       //$n else if (!strcmp(term, _GPGGAterm) || !strcmp(term, _GNGGAterm))
-      curSentenceType = NavIC_SENTENCE_GNGGA; //$n curSentenceType = GPS_SENTENCE_GPGGA;
+    if (!strcmp(term, _GNRMCterm))
+      curSentenceType = NavIC_SENTENCE_GNRMC;
+    else if (!strcmp(term, _GNGGAterm))
+      curSentenceType = NavIC_SENTENCE_GNGGA;
     else
       curSentenceType = GPS_SENTENCE_OTHER;
 
@@ -266,7 +268,9 @@ bool TinyGPSPlus::endOfTermHandler()
     }
 
   // Set custom values as needed
-  for (TinyGPSCustom *p = customCandidates; p != NULL && strcmp(p->sentenceName, customCandidates->sentenceName) == 0 && p->termNumber <= curTermNumber; p = p->next)
+  for (navic_rmc_gga
+           Custom *p = customCandidates;
+       p != NULL && strcmp(p->sentenceName, customCandidates->sentenceName) == 0 && p->termNumber <= curTermNumber; p = p->next)
     if (p->termNumber == curTermNumber)
       p->set(term);
 
@@ -274,7 +278,7 @@ bool TinyGPSPlus::endOfTermHandler()
 }
 
 /* static */
-double TinyGPSPlus::distanceBetween(double lat1, double long1, double lat2, double long2)
+double navic_rmc_ggaPlus::distanceBetween(double lat1, double long1, double lat2, double long2)
 {
   // returns distance in meters between two positions, both specified
   // as signed decimal-degrees latitude and longitude. Uses great-circle
@@ -299,7 +303,7 @@ double TinyGPSPlus::distanceBetween(double lat1, double long1, double lat2, doub
   return delta * 6372795;
 }
 
-double TinyGPSPlus::courseTo(double lat1, double long1, double lat2, double long2)
+double navic_rmc_ggaPlus::courseTo(double lat1, double long1, double lat2, double long2)
 {
   // returns course in degrees (North=0, West=270) from position 1 to position 2,
   // both specified as signed decimal-degrees latitude and longitude.
@@ -319,14 +323,14 @@ double TinyGPSPlus::courseTo(double lat1, double long1, double lat2, double long
   return degrees(a2);
 }
 
-const char *TinyGPSPlus::cardinal(double course)
+const char *navic_rmc_ggaPlus::cardinal(double course)
 {
   static const char *directions[] = {"N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"};
   int direction = (int)((course + 11.25f) / 22.5f);
   return directions[direction % 16];
 }
 
-void TinyGPSLocation::commit()
+void navic_rmc_ggaLocation::commit()
 {
   rawLatData = rawNewLatData;
   rawLngData = rawNewLngData;
@@ -334,127 +338,131 @@ void TinyGPSLocation::commit()
   valid = updated = true;
 }
 
-void TinyGPSLocation::setLatitude(const char *term)
+void navic_rmc_ggaLocation::setLatitude(const char *term)
 {
-  TinyGPSPlus::parseDegrees(term, rawNewLatData);
+  navic_rmc_gga
+      Plus::parseDegrees(term, rawNewLatData);
 }
 
-void TinyGPSLocation::setLongitude(const char *term)
+void navic_rmc_ggaLocation::setLongitude(const char *term)
 {
-  TinyGPSPlus::parseDegrees(term, rawNewLngData);
+  navic_rmc_gga
+      Plus::parseDegrees(term, rawNewLngData);
 }
 
-double TinyGPSLocation::lat()
+double navic_rmc_ggaLocation::lat()
 {
   updated = false;
   double ret = rawLatData.deg + rawLatData.billionths / 1000000000.0;
   return rawLatData.negative ? -ret : ret;
 }
 
-double TinyGPSLocation::lng()
+double navic_rmc_ggaLocation::lng()
 {
   updated = false;
   double ret = rawLngData.deg + rawLngData.billionths / 1000000000.0;
   return rawLngData.negative ? -ret : ret;
 }
 
-void TinyGPSDate::commit()
+void navic_rmc_ggaDate::commit()
 {
   date = newDate;
   lastCommitTime = millis();
   valid = updated = true;
 }
 
-void TinyGPSTime::commit()
+void navic_rmc_ggaTime::commit()
 {
   time = newTime;
   lastCommitTime = millis();
   valid = updated = true;
 }
 
-void TinyGPSTime::setTime(const char *term)
+void navic_rmc_ggaTime::setTime(const char *term)
 {
-  newTime = (uint32_t)TinyGPSPlus::parseDecimal(term);
+  newTime = (uint32_t)navic_rmc_gga
+      Plus::parseDecimal(term);
 }
 
-void TinyGPSDate::setDate(const char *term)
+void navic_rmc_ggaDate::setDate(const char *term)
 {
   newDate = atol(term);
 }
 
-uint16_t TinyGPSDate::year()
+uint16_t navic_rmc_ggaDate::year()
 {
   updated = false;
   uint16_t year = date % 100;
   return year + 2000;
 }
 
-uint8_t TinyGPSDate::month()
+uint8_t navic_rmc_ggaDate::month()
 {
   updated = false;
   return (date / 100) % 100;
 }
 
-uint8_t TinyGPSDate::day()
+uint8_t navic_rmc_ggaDate::day()
 {
   updated = false;
   return date / 10000;
 }
 
-uint8_t TinyGPSTime::hour()
+uint8_t navic_rmc_ggaTime::hour()
 {
   updated = false;
   return time / 1000000;
 }
 
-uint8_t TinyGPSTime::minute()
+uint8_t navic_rmc_ggaTime::minute()
 {
   updated = false;
   return (time / 10000) % 100;
 }
 
-uint8_t TinyGPSTime::second()
+uint8_t navic_rmc_ggaTime::second()
 {
   updated = false;
   return (time / 100) % 100;
 }
 
-uint8_t TinyGPSTime::centisecond()
+uint8_t navic_rmc_ggaTime::centisecond()
 {
   updated = false;
   return time % 100;
 }
 
-void TinyGPSDecimal::commit()
+void navic_rmc_ggaDecimal::commit()
 {
   val = newval;
   lastCommitTime = millis();
   valid = updated = true;
 }
 
-void TinyGPSDecimal::set(const char *term)
+void navic_rmc_ggaDecimal::set(const char *term)
 {
-  newval = TinyGPSPlus::parseDecimal(term);
+  newval = navic_rmc_gga
+      Plus::parseDecimal(term);
 }
 
-void TinyGPSInteger::commit()
+void navic_rmc_ggaInteger::commit()
 {
   val = newval;
   lastCommitTime = millis();
   valid = updated = true;
 }
 
-void TinyGPSInteger::set(const char *term)
+void navic_rmc_ggaInteger::set(const char *term)
 {
   newval = atol(term);
 }
 
-TinyGPSCustom::TinyGPSCustom(TinyGPSPlus &gps, const char *_sentenceName, int _termNumber)
+navic_rmc_ggaCustom::navic_rmc_ggaCustom(navic_rmc_ggaPlus &gps, const char *_sentenceName, int _termNumber)
 {
   begin(gps, _sentenceName, _termNumber);
 }
 
-void TinyGPSCustom::begin(TinyGPSPlus &gps, const char *_sentenceName, int _termNumber)
+void navic_rmc_ggaCustom::begin(navic_rmc_ggaPlus &gps, const char *_sentenceName, int _termNumber)
 {
   lastCommitTime = 0;
   updated = valid = false;
@@ -467,21 +475,22 @@ void TinyGPSCustom::begin(TinyGPSPlus &gps, const char *_sentenceName, int _term
   gps.insertCustom(this, _sentenceName, _termNumber);
 }
 
-void TinyGPSCustom::commit()
+void navic_rmc_ggaCustom::commit()
 {
   strcpy(this->buffer, this->stagingBuffer);
   lastCommitTime = millis();
   valid = updated = true;
 }
 
-void TinyGPSCustom::set(const char *term)
+void navic_rmc_ggaCustom::set(const char *term)
 {
   strncpy(this->stagingBuffer, term, sizeof(this->stagingBuffer));
 }
 
-void TinyGPSPlus::insertCustom(TinyGPSCustom *pElt, const char *sentenceName, int termNumber)
+void navic_rmc_ggaPlus::insertCustom(navic_rmc_ggaCustom *pElt, const char *sentenceName, int termNumber)
 {
-  TinyGPSCustom **ppelt;
+  navic_rmc_gga
+      Custom **ppelt;
 
   for (ppelt = &this->customElts; *ppelt != NULL; ppelt = &(*ppelt)->next)
   {
