@@ -294,9 +294,9 @@ public:
 private:
    enum
    {
-      GPS_SENTENCE_GPGGA,
-      GPS_SENTENCE_GPRMC,
-      GPS_SENTENCE_OTHER
+      NAVIC_SENTENCE_GPGGA,
+      NAVIC_SENTENCE_GPRMC,
+      NAVIC_SENTENCE_OTHER
    };
 
    // parsing state variables
