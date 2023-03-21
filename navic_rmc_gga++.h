@@ -21,8 +21,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef __TinyGPSPlus_h
-#define __TinyGPSPlus_h
+#ifndef __navic_gn_rmc_gga_h
+#define __navic_gn_rmc_gga_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
@@ -31,39 +31,51 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 #include <limits.h>
 
-#define _GPS_VERSION "1.0.3" // software version of this library
-#define _GPS_MPH_PER_KNOT 1.15077945
-#define _GPS_MPS_PER_KNOT 0.51444444
-#define _GPS_KMPH_PER_KNOT 1.852
-#define _GPS_MILES_PER_METER 0.00062137112
-#define _GPS_KM_PER_METER 0.001
-#define _GPS_FEET_PER_METER 3.2808399
-#define _GPS_MAX_FIELD_SIZE 15
+#define _NavIC_VERSION "1.0.3" // software version of this library
+#define _NavIC_MPH_PER_KNOT 1.15077945
+#define _NavIC_MPS_PER_KNOT 0.51444444
+#define _NavIC_KMPH_PER_KNOT 1.852
+#define _NavIC_MILES_PER_METER 0.00062137112
+#define _NavIC_KM_PER_METER 0.001
+#define _NavIC_FEET_PER_METER 3.2808399
+#define _NavIC_MAX_FIELD_SIZE 15
 
 struct RawDegrees
 {
    uint16_t deg;
    uint32_t billionths;
    bool negative;
+
 public:
    RawDegrees() : deg(0), billionths(0), negative(false)
-   {}
+   {
+   }
 };
 
-struct TinyGPSLocation
+struct NavIC_Location
 {
-   friend class TinyGPSPlus;
+   friend class navic_gn_rmc_gga;
+
 public:
-   bool isValid() const    { return valid; }
-   bool isUpdated() const  { return updated; }
-   uint32_t age() const    { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
-   const RawDegrees &rawLat()     { updated = false; return rawLatData; }
-   const RawDegrees &rawLng()     { updated = false; return rawLngData; }
+   bool isValid() const { return valid; }
+   bool isUpdated() const { return updated; }
+   uint32_t age() const { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
+   const RawDegrees &rawLat()
+   {
+      updated = false;
+      return rawLatData;
+   }
+   const RawDegrees &rawLng()
+   {
+      updated = false;
+      return rawLngData;
+   }
    double lat();
    double lng();
 
-   TinyGPSLocation() : valid(false), updated(false)
-   {}
+   NavIC_Location() : valid(false), updated(false)
+   {
+   }
 
 private:
    bool valid, updated;
@@ -74,21 +86,27 @@ private:
    void setLongitude(const char *term);
 };
 
-struct TinyGPSDate
+struct NavIC_date
 {
-   friend class TinyGPSPlus;
-public:
-   bool isValid() const       { return valid; }
-   bool isUpdated() const     { return updated; }
-   uint32_t age() const       { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
+   friend class navic_gn_rmc_gga;
 
-   uint32_t value()           { updated = false; return date; }
+public:
+   bool isValid() const { return valid; }
+   bool isUpdated() const { return updated; }
+   uint32_t age() const { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
+
+   uint32_t value()
+   {
+      updated = false;
+      return date;
+   }
    uint16_t year();
    uint8_t month();
    uint8_t day();
 
-   TinyGPSDate() : valid(false), updated(false), date(0)
-   {}
+   NavIC_date() : valid(false), updated(false), date(0)
+   {
+   }
 
 private:
    bool valid, updated;
@@ -98,22 +116,28 @@ private:
    void setDate(const char *term);
 };
 
-struct TinyGPSTime
+struct NavIC_time
 {
-   friend class TinyGPSPlus;
-public:
-   bool isValid() const       { return valid; }
-   bool isUpdated() const     { return updated; }
-   uint32_t age() const       { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
+   friend class navic_gn_rmc_gga;
 
-   uint32_t value()           { updated = false; return time; }
+public:
+   bool isValid() const { return valid; }
+   bool isUpdated() const { return updated; }
+   uint32_t age() const { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
+
+   uint32_t value()
+   {
+      updated = false;
+      return time;
+   }
    uint8_t hour();
    uint8_t minute();
    uint8_t second();
    uint8_t centisecond();
 
-   TinyGPSTime() : valid(false), updated(false), time(0)
-   {}
+   NavIC_time() : valid(false), updated(false), time(0)
+   {
+   }
 
 private:
    bool valid, updated;
@@ -123,17 +147,23 @@ private:
    void setTime(const char *term);
 };
 
-struct TinyGPSDecimal
+struct NavIC_decimal
 {
-   friend class TinyGPSPlus;
-public:
-   bool isValid() const    { return valid; }
-   bool isUpdated() const  { return updated; }
-   uint32_t age() const    { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
-   int32_t value()         { updated = false; return val; }
+   friend class navic_gn_rmc_gga;
 
-   TinyGPSDecimal() : valid(false), updated(false), val(0)
-   {}
+public:
+   bool isValid() const { return valid; }
+   bool isUpdated() const { return updated; }
+   uint32_t age() const { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
+   int32_t value()
+   {
+      updated = false;
+      return val;
+   }
+
+   NavIC_decimal() : valid(false), updated(false), val(0)
+   {
+   }
 
 private:
    bool valid, updated;
@@ -143,17 +173,23 @@ private:
    void set(const char *term);
 };
 
-struct TinyGPSInteger
+struct NavIC_integer
 {
-   friend class TinyGPSPlus;
-public:
-   bool isValid() const    { return valid; }
-   bool isUpdated() const  { return updated; }
-   uint32_t age() const    { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
-   uint32_t value()        { updated = false; return val; }
+   friend class navic_gn_rmc_gga;
 
-   TinyGPSInteger() : valid(false), updated(false), val(0)
-   {}
+public:
+   bool isValid() const { return valid; }
+   bool isUpdated() const { return updated; }
+   uint32_t age() const { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
+   uint32_t value()
+   {
+      updated = false;
+      return val;
+   }
+
+   NavIC_integer() : valid(false), updated(false), val(0)
+   {
+   }
 
 private:
    bool valid, updated;
@@ -163,116 +199,130 @@ private:
    void set(const char *term);
 };
 
-struct TinyGPSSpeed : TinyGPSDecimal
+struct NavIC_speed : NavIC_decimal
 {
-   double knots()    { return value() / 100.0; }
-   double mph()      { return _GPS_MPH_PER_KNOT * value() / 100.0; }
-   double mps()      { return _GPS_MPS_PER_KNOT * value() / 100.0; }
-   double kmph()     { return _GPS_KMPH_PER_KNOT * value() / 100.0; }
+   double knots() { return value() / 100.0; }
+   double mph() { return _NavIC_MPH_PER_KNOT * value() / 100.0; }
+   double mps() { return _NavIC_MPS_PER_KNOT * value() / 100.0; }
+   double kmph() { return _NavIC_KMPH_PER_KNOT * value() / 100.0; }
 };
 
-struct TinyGPSCourse : public TinyGPSDecimal
+struct NavIC_course : public NavIC_decimal
 {
-   double deg()      { return value() / 100.0; }
+   double deg() { return value() / 100.0; }
 };
 
-struct TinyGPSAltitude : TinyGPSDecimal
+struct NavIC_altitudes : NavIC_decimal
 {
-   double meters()       { return value() / 100.0; }
-   double miles()        { return _GPS_MILES_PER_METER * value() / 100.0; }
-   double kilometers()   { return _GPS_KM_PER_METER * value() / 100.0; }
-   double feet()         { return _GPS_FEET_PER_METER * value() / 100.0; }
+   double meters() { return value() / 100.0; }
+   double miles() { return _NavIC_MILES_PER_METER * value() / 100.0; }
+   double kilometers() { return _NavIC_KM_PER_METER * value() / 100.0; }
+   double feet() { return _NavIC_FEET_PER_METER * value() / 100.0; }
 };
 
-struct TinyGPSHDOP : TinyGPSDecimal
+struct NavIC_HDOP : NavIC_decimal
 {
    double hdop() { return value() / 100.0; }
 };
 
-class TinyGPSPlus;
-class TinyGPSCustom
+class navic_gn_rmc_gga;
+class NavIC_CUSTOM
 {
 public:
-   TinyGPSCustom() {};
-   TinyGPSCustom(TinyGPSPlus &gps, const char *sentenceName, int termNumber);
-   void begin(TinyGPSPlus &gps, const char *_sentenceName, int _termNumber);
+   NavIC_CUSTOM(){};
+   NavIC_CUSTOM(navic_gn_rmc_gga &gps, const char *sentenceName, int termNumber);
+   void begin(navic_gn_rmc_gga &gps, const char *_sentenceName, int _termNumber);
 
-   bool isUpdated() const  { return updated; }
-   bool isValid() const    { return valid; }
-   uint32_t age() const    { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
-   const char *value()     { updated = false; return buffer; }
+   bool isUpdated() const { return updated; }
+   bool isValid() const { return valid; }
+   uint32_t age() const { return valid ? millis() - lastCommitTime : (uint32_t)ULONG_MAX; }
+   const char *value()
+   {
+      updated = false;
+      return buffer;
+   }
 
 private:
    void commit();
    void set(const char *term);
 
-   char stagingBuffer[_GPS_MAX_FIELD_SIZE + 1];
-   char buffer[_GPS_MAX_FIELD_SIZE + 1];
+   char stagingBuffer[_NavIC_MAX_FIELD_SIZE + 1];
+   char buffer[_NavIC_MAX_FIELD_SIZE + 1];
    unsigned long lastCommitTime;
    bool valid, updated;
    const char *sentenceName;
    int termNumber;
-   friend class TinyGPSPlus;
-   TinyGPSCustom *next;
+   friend class navic_gn_rmc_gga;
+   NavIC_CUSTOM *next;
 };
 
-class TinyGPSPlus
+class navic_gn_rmc_gga
 {
 public:
-  TinyGPSPlus();
-  bool encode(char c); // process one character received from GPS
-  TinyGPSPlus &operator << (char c) {encode(c); return *this;}
+   navic_gn_rmc_gga();
+   bool encode(char c); // process one character received from GPS
+   navic_gn_rmc_gga &operator<<(char c)
+   {
+      encode(c);
+      return *this;
+   }
 
-  TinyGPSLocation location;
-  TinyGPSDate date;
-  TinyGPSTime time;
-  TinyGPSSpeed speed;
-  TinyGPSCourse course;
-  TinyGPSAltitude altitude;
-  TinyGPSInteger satellites;
-  TinyGPSHDOP hdop;
+   NavIC_Location location;
+   NavIC_date
+       date;
+   NavIC_time time;
+   NavIC_speed speed;
+   NavIC_course course;
+   NavIC_altitudes altitude;
+   NavIC_integer satellites;
+   NavIC_HDOP hdop;
 
-  static const char *libraryVersion() { return _GPS_VERSION; }
+   static const char *libraryVersion() { return _NavIC_VERSION; }
 
-  static double distanceBetween(double lat1, double long1, double lat2, double long2);
-  static double courseTo(double lat1, double long1, double lat2, double long2);
-  static const char *cardinal(double course);
+   static double distanceBetween(double lat1, double long1, double lat2, double long2);
+   static double courseTo(double lat1, double long1, double lat2, double long2);
+   static const char *cardinal(double course);
 
-  static int32_t parseDecimal(const char *term);
-  static void parseDegrees(const char *term, RawDegrees &deg);
+   static int32_t parseDecimal(const char *term);
+   static void parseDegrees(const char *term, RawDegrees &deg);
 
-  uint32_t charsProcessed()   const { return encodedCharCount; }
-  uint32_t sentencesWithFix() const { return sentencesWithFixCount; }
-  uint32_t failedChecksum()   const { return failedChecksumCount; }
-  uint32_t passedChecksum()   const { return passedChecksumCount; }
+   uint32_t charsProcessed() const { return encodedCharCount; }
+   uint32_t sentencesWithFix() const { return sentencesWithFixCount; }
+   uint32_t failedChecksum() const { return failedChecksumCount; }
+   uint32_t passedChecksum() const { return passedChecksumCount; }
 
 private:
-  enum {GPS_SENTENCE_GPGGA, GPS_SENTENCE_GPRMC, GPS_SENTENCE_OTHER};
+   enum
+   {
+      GPS_SENTENCE_GPGGA,
+      GPS_SENTENCE_GPRMC,
+      GPS_SENTENCE_OTHER
+   };
 
-  // parsing state variables
-  uint8_t parity;
-  bool isChecksumTerm;
-  char term[_GPS_MAX_FIELD_SIZE];
-  uint8_t curSentenceType;
-  uint8_t curTermNumber;
-  uint8_t curTermOffset;
-  bool sentenceHasFix;
+   // parsing state variables
+   uint8_t parity;
+   bool isChecksumTerm;
+   char term[_NavIC_MAX_FIELD_SIZE];
+   uint8_t curSentenceType;
+   uint8_t curTermNumber;
+   uint8_t curTermOffset;
+   bool sentenceHasFix;
 
-  // custom element support
-  friend class TinyGPSCustom;
-  TinyGPSCustom *customElts;
-  TinyGPSCustom *customCandidates;
-  void insertCustom(TinyGPSCustom *pElt, const char *sentenceName, int index);
+   // custom element support
+   friend class NavIC_CUSTOM;
+   NavIC_CUSTOM *customElts;
+   NavIC_CUSTOM *customCandidates;
+   void insertCustom(NavIC_CUSTOM *pElt, const char *sentenceName, int index);
 
-  // statistics
-  uint32_t encodedCharCount;
-  uint32_t sentencesWithFixCount;
-  uint32_t failedChecksumCount;
-  uint32_t passedChecksumCount;
+   // statistics
+   uint32_t encodedCharCount;
+   uint32_t sentencesWithFixCount;
+   uint32_t failedChecksumCount;
+   uint32_t passedChecksumCount;
 
-  // internal utilities
-  int fromHex(char a);
-  bool endOfTermHandler();
+   // internal utilities
+   int fromHex(char a);
+   bool endOfTermHandler();
 };
 
-#endif // def(__TinyGPSPlus_h)
+#endif // def(__navic_gn_rmc_gga_h)
