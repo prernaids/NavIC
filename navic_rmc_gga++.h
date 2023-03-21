@@ -1,5 +1,3 @@
-
-
 /*
 TinyGPS++ - a small GPS library for Arduino providing universal NMEA parsing
 Based on work by and "distanceBetween" and "courseTo" courtesy of Maarten Lamers.
