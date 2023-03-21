@@ -1,5 +1,5 @@
 /*
-navic_rmc_gga++ - a small GPS library for Arduino providing universal NMEA parsing
+TinyGPS++ - a small GPS library for Arduino providing universal NMEA parsing
 Based on work by and "distanceBetween" and "courseTo" courtesy of Maarten Lamers.
 Suggestion to add satellites, courseTo(), and cardinal() by Matt Monson.
 Location precision improvements suggested by Wayne Holder.
@@ -32,8 +32,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define _GNRMCterm "GNRMC"
 #define _GNGGAterm "GNGGA"
 
-navic_rmc_ggaPlus::navic_rmc_ggaPlus()
-    : parity(0), isChecksumTerm(false), curSentenceType(GPS_SENTENCE_OTHER), curTermNumber(0), curTermOffset(0), sentenceHasFix(false), customElts(0), customCandidates(0), encodedCharCount(0), sentencesWithFixCount(0), failedChecksumCount(0), passedChecksumCount(0)
+navic_gn_rmc_gga::navic_gn_rmc_gga()
+    : parity(0), isChecksumTerm(false), curSentenceType(NAVIC_SENTENCE_OTHER), curTermNumber(0), curTermOffset(0), sentenceHasFix(false), customElts(0), customCandidates(0), encodedCharCount(0), sentencesWithFixCount(0), failedChecksumCount(0), passedChecksumCount(0)
 {
   term[0] = '\0';
 }
@@ -42,7 +42,7 @@ navic_rmc_ggaPlus::navic_rmc_ggaPlus()
 // public methods
 //
 
-bool navic_rmc_ggaPlus::encode(char c)
+bool navic_gn_rmc_gga::encode(char c)
 {
   ++encodedCharCount;
 
@@ -70,7 +70,7 @@ bool navic_rmc_ggaPlus::encode(char c)
   case '$': // sentence begin
     curTermNumber = curTermOffset = 0;
     parity = 0;
-    curSentenceType = GPS_SENTENCE_OTHER;
+    curSentenceType = NAVIC_SENTENCE_OTHER;
     isChecksumTerm = false;
     sentenceHasFix = false;
     return false;
@@ -89,7 +89,7 @@ bool navic_rmc_ggaPlus::encode(char c)
 //
 // internal utilities
 //
-int navic_rmc_ggaPlus::fromHex(char a)
+int navic_gn_rmc_gga::fromHex(char a)
 {
   if (a >= 'A' && a <= 'F')
     return a - 'A' + 10;
@@ -101,7 +101,7 @@ int navic_rmc_ggaPlus::fromHex(char a)
 
 // static
 // Parse a (potentially negative) number with up to 2 decimal digits -xxxx.yy
-int32_t navic_rmc_ggaPlus::parseDecimal(const char *term)
+int32_t navic_gn_rmc_gga::parseDecimal(const char *term)
 {
   bool negative = *term == '-';
   if (negative)
@@ -120,7 +120,7 @@ int32_t navic_rmc_ggaPlus::parseDecimal(const char *term)
 
 // static
 // Parse degrees in that funny NMEA format DDMM.MMMM
-void navic_rmc_ggaPlus::parseDegrees(const char *term, RawDegrees &deg)
+void navic_gn_rmc_gga::parseDegrees(const char *term, RawDegrees &deg)
 {
   uint32_t leftOfDecimal = (uint32_t)atol(term);
   uint16_t minutes = (uint16_t)(leftOfDecimal % 100);
@@ -147,7 +147,7 @@ void navic_rmc_ggaPlus::parseDegrees(const char *term, RawDegrees &deg)
 
 // Processes a just-completed term
 // Returns true if new sentence has just passed checksum test and is validated
-bool navic_rmc_ggaPlus::endOfTermHandler()
+bool navic_gn_rmc_gga::endOfTermHandler()
 {
   // If it's the checksum term, and the checksum checks out, commit
   if (isChecksumTerm)
@@ -207,7 +207,7 @@ bool navic_rmc_ggaPlus::endOfTermHandler()
     else if (!strcmp(term, _GNGGAterm))
       curSentenceType = NavIC_SENTENCE_GNGGA;
     else
-      curSentenceType = GPS_SENTENCE_OTHER;
+      curSentenceType = NAVIC_SENTENCE_OTHER;
 
     // Any custom candidates of this sentence type?
     for (customCandidates = customElts; customCandidates != NULL && strcmp(customCandidates->sentenceName, term) < 0; customCandidates = customCandidates->next)
@@ -218,7 +218,7 @@ bool navic_rmc_ggaPlus::endOfTermHandler()
     return false;
   }
 
-  if (curSentenceType != GPS_SENTENCE_OTHER && term[0])
+  if (curSentenceType != NAVIC_SENTENCE_OTHER && term[0])
     switch (COMBINE(curSentenceType, curTermNumber))
     {
     case COMBINE(GPS_SENTENCE_GPRMC, 1): // Time in both sentences
@@ -278,7 +278,7 @@ bool navic_rmc_ggaPlus::endOfTermHandler()
 }
 
 /* static */
-double navic_rmc_ggaPlus::distanceBetween(double lat1, double long1, double lat2, double long2)
+double navic_gn_rmc_gga::distanceBetween(double lat1, double long1, double lat2, double long2)
 {
   // returns distance in meters between two positions, both specified
   // as signed decimal-degrees latitude and longitude. Uses great-circle
@@ -303,7 +303,7 @@ double navic_rmc_ggaPlus::distanceBetween(double lat1, double long1, double lat2
   return delta * 6372795;
 }
 
-double navic_rmc_ggaPlus::courseTo(double lat1, double long1, double lat2, double long2)
+double navic_gn_rmc_gga::courseTo(double lat1, double long1, double lat2, double long2)
 {
   // returns course in degrees (North=0, West=270) from position 1 to position 2,
   // both specified as signed decimal-degrees latitude and longitude.
@@ -323,7 +323,7 @@ double navic_rmc_ggaPlus::courseTo(double lat1, double long1, double lat2, doubl
   return degrees(a2);
 }
 
-const char *navic_rmc_ggaPlus::cardinal(double course)
+const char *navic_gn_rmc_gga::cardinal(double course)
 {
   static const char *directions[] = {"N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"};
   int direction = (int)((course + 11.25f) / 22.5f);
@@ -457,12 +457,12 @@ void navic_rmc_ggaInteger::set(const char *term)
   newval = atol(term);
 }
 
-navic_rmc_ggaCustom::navic_rmc_ggaCustom(navic_rmc_ggaPlus &gps, const char *_sentenceName, int _termNumber)
+navic_rmc_ggaCustom::navic_rmc_ggaCustom(navic_gn_rmc_gga &gps, const char *_sentenceName, int _termNumber)
 {
   begin(gps, _sentenceName, _termNumber);
 }
 
-void navic_rmc_ggaCustom::begin(navic_rmc_ggaPlus &gps, const char *_sentenceName, int _termNumber)
+void navic_rmc_ggaCustom::begin(navic_gn_rmc_gga &gps, const char *_sentenceName, int _termNumber)
 {
   lastCommitTime = 0;
   updated = valid = false;
@@ -487,7 +487,7 @@ void navic_rmc_ggaCustom::set(const char *term)
   strncpy(this->stagingBuffer, term, sizeof(this->stagingBuffer));
 }
 
-void navic_rmc_ggaPlus::insertCustom(navic_rmc_ggaCustom *pElt, const char *sentenceName, int termNumber)
+void navic_gn_rmc_gga::insertCustom(navic_rmc_ggaCustom *pElt, const char *sentenceName, int termNumber)
 {
   navic_rmc_gga
       Custom **ppelt;
