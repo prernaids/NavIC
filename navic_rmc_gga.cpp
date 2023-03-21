@@ -1,5 +1,5 @@
 /*
-TinyGPS++ - a small GPS library for Arduino providing universal NMEA parsing
+Tinynavic++ - a small navic library for Arduino providing universal NMEA parsing
 Based on work by and "distanceBetween" and "courseTo" courtesy of Maarten Lamers.
 Suggestion to add satellites, courseTo(), and cardinal() by Matt Monson.
 Location precision improvements suggested by Wayne Holder.
@@ -27,8 +27,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <ctype.h>
 #include <stdlib.h>
 
-// #define _GPRMCterm "GPRMC"
-// #define _GPGGAterm "GPGGA"
+// #define _GNRMCterm "GNRMC"
+// #define _GNGGAterm "GNGGA"
 #define _GNRMCterm "GNRMC"
 #define _GNGGAterm "GNGGA"
 
@@ -161,7 +161,7 @@ bool navic_gn_rmc_gga::endOfTermHandler()
 
       switch (curSentenceType)
       {
-      case GPS_SENTENCE_GPRMC:
+      case NAVIC_SENTENCE_GNRMC:
         date.commit();
         time.commit();
         if (sentenceHasFix)
@@ -171,7 +171,7 @@ bool navic_gn_rmc_gga::endOfTermHandler()
           course.commit();
         }
         break;
-      case GPS_SENTENCE_GPGGA:
+      case NAVIC_SENTENCE_GNGGA:
         time.commit();
         if (sentenceHasFix)
         {
@@ -221,48 +221,48 @@ bool navic_gn_rmc_gga::endOfTermHandler()
   if (curSentenceType != NAVIC_SENTENCE_OTHER && term[0])
     switch (COMBINE(curSentenceType, curTermNumber))
     {
-    case COMBINE(GPS_SENTENCE_GPRMC, 1): // Time in both sentences
-    case COMBINE(GPS_SENTENCE_GPGGA, 1):
+    case COMBINE(NAVIC_SENTENCE_GNRMC, 1): // Time in both sentences
+    case COMBINE(NAVIC_SENTENCE_GNGGA, 1):
       time.setTime(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 2): // GPRMC validity
+    case COMBINE(NAVIC_SENTENCE_GNRMC, 2): // GNRMC validity
       sentenceHasFix = term[0] == 'A';
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 3): // Latitude
-    case COMBINE(GPS_SENTENCE_GPGGA, 2):
+    case COMBINE(NAVIC_SENTENCE_GNRMC, 3): // Latitude
+    case COMBINE(NAVIC_SENTENCE_GNGGA, 2):
       location.setLatitude(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 4): // N/S
-    case COMBINE(GPS_SENTENCE_GPGGA, 3):
+    case COMBINE(NAVIC_SENTENCE_GNRMC, 4): // N/S
+    case COMBINE(NAVIC_SENTENCE_GNGGA, 3):
       location.rawNewLatData.negative = term[0] == 'S';
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 5): // Longitude
-    case COMBINE(GPS_SENTENCE_GPGGA, 4):
+    case COMBINE(NAVIC_SENTENCE_GNRMC, 5): // Longitude
+    case COMBINE(NAVIC_SENTENCE_GNGGA, 4):
       location.setLongitude(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 6): // E/W
-    case COMBINE(GPS_SENTENCE_GPGGA, 5):
+    case COMBINE(NAVIC_SENTENCE_GNRMC, 6): // E/W
+    case COMBINE(NAVIC_SENTENCE_GNGGA, 5):
       location.rawNewLngData.negative = term[0] == 'W';
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 7): // Speed (GPRMC)
+    case COMBINE(NAVIC_SENTENCE_GNRMC, 7): // Speed (GNRMC)
       speed.set(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 8): // Course (GPRMC)
+    case COMBINE(NAVIC_SENTENCE_GNRMC, 8): // Course (GNRMC)
       course.set(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 9): // Date (GPRMC)
+    case COMBINE(NAVIC_SENTENCE_GNRMC, 9): // Date (GNRMC)
       date.setDate(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPGGA, 6): // Fix data (GPGGA)
+    case COMBINE(NAVIC_SENTENCE_GNGGA, 6): // Fix data (GNGGA)
       sentenceHasFix = term[0] > '0';
       break;
-    case COMBINE(GPS_SENTENCE_GPGGA, 7): // Satellites used (GPGGA)
+    case COMBINE(NAVIC_SENTENCE_GNGGA, 7): // Satellites used (GNGGA)
       satellites.set(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPGGA, 8): // HDOP
+    case COMBINE(NAVIC_SENTENCE_GNGGA, 8): // HDOP
       hdop.set(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPGGA, 9): // Altitude (GPGGA)
+    case COMBINE(NAVIC_SENTENCE_GNGGA, 9): // Altitude (GNGGA)
       altitude.set(term);
       break;
     }
@@ -330,7 +330,7 @@ const char *navic_gn_rmc_gga::cardinal(double course)
   return directions[direction % 16];
 }
 
-void navic_rmc_ggaLocation::commit()
+void navic_location::commit()
 {
   rawLatData = rawNewLatData;
   rawLngData = rawNewLngData;
@@ -338,131 +338,131 @@ void navic_rmc_ggaLocation::commit()
   valid = updated = true;
 }
 
-void navic_rmc_ggaLocation::setLatitude(const char *term)
+void navic_location::setLatitude(const char *term)
 {
   navic_rmc_gga
       Plus::parseDegrees(term, rawNewLatData);
 }
 
-void navic_rmc_ggaLocation::setLongitude(const char *term)
+void navic_location::setLongitude(const char *term)
 {
   navic_rmc_gga
       Plus::parseDegrees(term, rawNewLngData);
 }
 
-double navic_rmc_ggaLocation::lat()
+double navic_location::lat()
 {
   updated = false;
   double ret = rawLatData.deg + rawLatData.billionths / 1000000000.0;
   return rawLatData.negative ? -ret : ret;
 }
 
-double navic_rmc_ggaLocation::lng()
+double navic_location::lng()
 {
   updated = false;
   double ret = rawLngData.deg + rawLngData.billionths / 1000000000.0;
   return rawLngData.negative ? -ret : ret;
 }
 
-void navic_rmc_ggaDate::commit()
+void navic_date::commit()
 {
   date = newDate;
   lastCommitTime = millis();
   valid = updated = true;
 }
 
-void navic_rmc_ggaTime::commit()
+void navic_time::commit()
 {
   time = newTime;
   lastCommitTime = millis();
   valid = updated = true;
 }
 
-void navic_rmc_ggaTime::setTime(const char *term)
+void navic_time::setTime(const char *term)
 {
   newTime = (uint32_t)navic_rmc_gga
       Plus::parseDecimal(term);
 }
 
-void navic_rmc_ggaDate::setDate(const char *term)
+void navic_date::setDate(const char *term)
 {
   newDate = atol(term);
 }
 
-uint16_t navic_rmc_ggaDate::year()
+uint16_t navic_date::year()
 {
   updated = false;
   uint16_t year = date % 100;
   return year + 2000;
 }
 
-uint8_t navic_rmc_ggaDate::month()
+uint8_t navic_date::month()
 {
   updated = false;
   return (date / 100) % 100;
 }
 
-uint8_t navic_rmc_ggaDate::day()
+uint8_t navic_date::day()
 {
   updated = false;
   return date / 10000;
 }
 
-uint8_t navic_rmc_ggaTime::hour()
+uint8_t navic_time::hour()
 {
   updated = false;
   return time / 1000000;
 }
 
-uint8_t navic_rmc_ggaTime::minute()
+uint8_t navic_time::minute()
 {
   updated = false;
   return (time / 10000) % 100;
 }
 
-uint8_t navic_rmc_ggaTime::second()
+uint8_t navic_time::second()
 {
   updated = false;
   return (time / 100) % 100;
 }
 
-uint8_t navic_rmc_ggaTime::centisecond()
+uint8_t navic_time::centisecond()
 {
   updated = false;
   return time % 100;
 }
 
-void navic_rmc_ggaDecimal::commit()
+void navic_decimal::commit()
 {
   val = newval;
   lastCommitTime = millis();
   valid = updated = true;
 }
 
-void navic_rmc_ggaDecimal::set(const char *term)
+void navic_decimal::set(const char *term)
 {
   newval = navic_rmc_gga
       Plus::parseDecimal(term);
 }
 
-void navic_rmc_ggaInteger::commit()
+void navic_integer::commit()
 {
   val = newval;
   lastCommitTime = millis();
   valid = updated = true;
 }
 
-void navic_rmc_ggaInteger::set(const char *term)
+void navic_integer::set(const char *term)
 {
   newval = atol(term);
 }
 
-navic_rmc_ggaCustom::navic_rmc_ggaCustom(navic_gn_rmc_gga &gps, const char *_sentenceName, int _termNumber)
+navic_custom::navic_custom(navic_gn_rmc_gga &navic, const char *_sentenceName, int _termNumber)
 {
-  begin(gps, _sentenceName, _termNumber);
+  begin(navic, _sentenceName, _termNumber);
 }
 
-void navic_rmc_ggaCustom::begin(navic_gn_rmc_gga &gps, const char *_sentenceName, int _termNumber)
+void navic_custom::begin(navic_gn_rmc_gga &navic, const char *_sentenceName, int _termNumber)
 {
   lastCommitTime = 0;
   updated = valid = false;
@@ -471,23 +471,23 @@ void navic_rmc_ggaCustom::begin(navic_gn_rmc_gga &gps, const char *_sentenceName
   memset(stagingBuffer, '\0', sizeof(stagingBuffer));
   memset(buffer, '\0', sizeof(buffer));
 
-  // Insert this item into the GPS tree
-  gps.insertCustom(this, _sentenceName, _termNumber);
+  // Insert this item into the navic tree
+  navic.insertCustom(this, _sentenceName, _termNumber);
 }
 
-void navic_rmc_ggaCustom::commit()
+void navic_custom::commit()
 {
   strcpy(this->buffer, this->stagingBuffer);
   lastCommitTime = millis();
   valid = updated = true;
 }
 
-void navic_rmc_ggaCustom::set(const char *term)
+void navic_custom::set(const char *term)
 {
   strncpy(this->stagingBuffer, term, sizeof(this->stagingBuffer));
 }
 
-void navic_gn_rmc_gga::insertCustom(navic_rmc_ggaCustom *pElt, const char *sentenceName, int termNumber)
+void navic_gn_rmc_gga::insertCustom(navic_custom *pElt, const char *sentenceName, int termNumber)
 {
   navic_rmc_gga
       Custom **ppelt;
